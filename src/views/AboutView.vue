@@ -1,12 +1,13 @@
 <template>
   <div class="about">
     <h1>{{ nome }}, hoje é Terça-Feira!</h1>
-    <input type="number" v-model="contador"/>
-    <button @click="incrementar">Incrementar</button>
-    <input type="text" v-model="nome"/>
+    <p><input type="text" v-model="nome"/></p>
     <p v-if="nome.length > 5">Texto longo!</p>
     <p v-else>Texto curto!</p>
+    <p><input type="password" v-model="senha"/></p>
+    <button @click="buscarUsuarios">Atualizar</button>
     <button @click="incluir">Incluir</button>
+    <p>{{ erro }}</p>
     <table>
       <thead>
         <td>Id</td>
@@ -23,26 +24,34 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
+  import axios from 'axios';
+  
   const nome = ref("Nome");
-  const usuarios = ref([{id:1, nome:"Zé"}, {id:2, nome:"Paula"}]);
-  const contador = ref(1);
+  const senha = ref("123");
+  const usuarios = ref();
+  const erro = ref("");
 
-  function incrementar() {
-    contador.value++;
+  async function incluir() {
+    erro.value = "";
+    try{
+      await axios.post("usuario", 
+        {
+          nome: nome.value,
+          senha: senha.value
+        });
+    }
+    catch(e) {
+      erro.value = (e as Error).message;
+    }
+    buscarUsuarios();
   }
 
-  function incluir() {
-    usuarios.value.push({id:contador.value, nome: nome.value});
+  async function buscarUsuarios() {
+    usuarios.value = (await axios.get("usuario")).data;
   }
+
+  onMounted(() => {
+    buscarUsuarios();
+  });
 </script>
-
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
