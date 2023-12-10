@@ -1,22 +1,26 @@
 <template>
   <div class="about">
-    <h1>{{ nome }}, hoje é Terça-Feira!</h1>
-    <p><input type="text" v-model="nome"/></p>
-    <p v-if="nome.length > 5">Texto longo!</p>
-    <p v-else>Texto curto!</p>
-    <p><input type="password" v-model="senha"/></p>
-    <button @click="buscarUsuarios">Atualizar</button>
+    <h1>Entregas</h1>
+    <p><label for="descricao">Descrição: </label><input id="descricao" type="text" v-model="entrega.descricao"/></p>
+    <p><label for="dataHoraLimite">Data/hora limite: </label><input id="dataHoraLimite" type="datetime-local" v-model="entrega.dataHoraLimite"/></p>
+    <p><label for="peso">Peso: </label><input id="peso" type="number" v-model="entrega.peso"/></p>
+    <p><label for="observacoes">Observações: </label><input id="observacoes" type="text" v-model="entrega.observacoes"/></p>
+    <button @click="buscarEntregas">Atualizar</button>
     <button @click="incluir">Incluir</button>
     <p>{{ erro }}</p>
     <table>
       <thead>
         <td>Id</td>
-        <td>Nome</td>
+        <td>Descrição</td>
+        <td>Data/hora limite</td>
+        <td>Peso</td>
       </thead>
       <tbody>
-        <tr v-for="usuario in usuarios" :key="usuario.id">
-          <td>{{ usuario.id }}</td>
-          <td>{{ usuario.nome }}</td>
+        <tr v-for="entrega in entregas" :key="entrega.id">
+          <td>{{ entrega.id }}</td>
+          <td>{{ entrega.descricao }}</td>
+          <td>{{ entrega.dataHoraLimite }}</td>
+          <td>{{ entrega.peso }}</td>
         </tr>
       </tbody>
     </table>
@@ -27,31 +31,32 @@
   import { onMounted, ref } from 'vue';
   import axios from 'axios';
   
-  const nome = ref("Nome");
-  const senha = ref("123");
-  const usuarios = ref();
+  const entrega = ref(
+    {
+      descricao: '',
+      dataHoraLimite: Date.now(),
+      peso: 1,
+      observacoes: ''
+    });
+  const entregas = ref();
   const erro = ref("");
 
   async function incluir() {
     erro.value = "";
     try{
-      await axios.post("usuario", 
-        {
-          nome: nome.value,
-          senha: senha.value
-        });
+      await axios.post("entrega", entrega.value);
     }
     catch(e) {
       erro.value = (e as Error).message;
     }
-    buscarUsuarios();
+    buscarEntregas();
   }
 
-  async function buscarUsuarios() {
-    usuarios.value = (await axios.get("usuario")).data;
+  async function buscarEntregas() {
+    entregas.value = (await axios.get("entrega")).data;
   }
 
   onMounted(() => {
-    buscarUsuarios();
+    buscarEntregas();
   });
 </script>
